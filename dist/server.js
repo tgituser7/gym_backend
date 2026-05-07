@@ -1,0 +1,33 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const db_1 = __importDefault(require("./config/db"));
+const errorHandler_1 = __importDefault(require("./middleware/errorHandler"));
+const auth_1 = __importDefault(require("./routes/auth"));
+const branches_1 = __importDefault(require("./routes/branches"));
+const members_1 = __importDefault(require("./routes/members"));
+const staff_1 = __importDefault(require("./routes/staff"));
+const services_1 = __importDefault(require("./routes/services"));
+const fees_1 = __importDefault(require("./routes/fees"));
+const stats_1 = __importDefault(require("./routes/stats"));
+dotenv_1.default.config();
+(0, db_1.default)();
+const app = (0, express_1.default)();
+app.use((0, cors_1.default)({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+app.use(express_1.default.json());
+app.use('/api/auth', auth_1.default);
+app.use('/api/branches', branches_1.default);
+app.use('/api/members', members_1.default);
+app.use('/api/staff', staff_1.default);
+app.use('/api/services', services_1.default);
+app.use('/api/fees', fees_1.default);
+app.use('/api/stats', stats_1.default);
+app.use(errorHandler_1.default);
+const PORT = parseInt(process.env.PORT || '5000', 10);
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+//# sourceMappingURL=server.js.map
