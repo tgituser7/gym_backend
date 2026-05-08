@@ -55,7 +55,7 @@ export interface IService {
     price: number;
     duration?: number;
     instructor?: Types.ObjectId;
-    category: 'Yoga' | 'Cardio' | 'Strength' | 'Pilates' | 'Swimming' | 'CrossFit' | 'Martial Arts' | 'Dance' | 'Nutrition' | 'Other';
+    category: 'Yoga' | 'Cardio' | 'Strength' | 'Pilates' | 'Swimming' | 'Martial Arts' | 'Dance' | 'Nutrition' | 'Other';
     schedule?: string;
     maxCapacity?: number;
     status: 'active' | 'inactive';

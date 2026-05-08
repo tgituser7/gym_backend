@@ -49,7 +49,9 @@ const memberSchema = new mongoose_1.Schema({
     emergencyContact: { type: String, trim: true },
     notes: { type: String, trim: true },
 }, { timestamps: true });
-memberSchema.index({ branch: 1, email: 1 }, { unique: true, sparse: true });
+// Partial index: only enforces uniqueness when email is actually a string,
+// allowing unlimited members without an email in the same branch.
+memberSchema.index({ branch: 1, email: 1 }, { unique: true, partialFilterExpression: { email: { $type: 'string' } } });
 memberSchema.index({ branch: 1, status: 1 });
 exports.default = mongoose_1.default.model('Member', memberSchema);
 //# sourceMappingURL=Member.js.map

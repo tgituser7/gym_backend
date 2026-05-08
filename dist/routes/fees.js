@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const luxon_1 = require("luxon");
 const Fee_1 = __importDefault(require("../models/Fee"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const gymFilter_1 = require("../utils/gymFilter");
@@ -11,7 +12,7 @@ const router = (0, express_1.Router)();
 router.use(auth_1.default);
 function withOverdue(statusQuery) {
     if (!statusQuery || statusQuery === 'overdue') {
-        const now = new Date();
+        const now = luxon_1.DateTime.now().toUTC().toJSDate();
         return statusQuery === 'overdue'
             ? { $or: [{ status: 'overdue' }, { status: 'pending', dueDate: { $lt: now } }] }
             : {};

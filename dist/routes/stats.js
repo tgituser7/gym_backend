@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const luxon_1 = require("luxon");
 const Member_1 = __importDefault(require("../models/Member"));
 const Staff_1 = __importDefault(require("../models/Staff"));
 const Service_1 = __importDefault(require("../models/Service"));
@@ -14,8 +15,7 @@ const router = (0, express_1.Router)();
 router.use(auth_1.default);
 router.get('/', async (req, res, next) => {
     try {
-        const now = new Date();
-        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthStart = luxon_1.DateTime.now().toUTC().startOf('month').toJSDate();
         const base = (0, gymFilter_1.branchFilter)(req);
         const branchId = req.branch._id;
         const [totalMembers, activeMembers, totalStaff, activeStaff, totalServices, revenueResult, pendingResult, recentMembers, upcomingDues,] = await Promise.all([
