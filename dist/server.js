@@ -23,6 +23,7 @@ const allowedOrigins = process.env.CLIENT_URL
     : true; // allow all origins when CLIENT_URL is not set
 app.use((0, cors_1.default)({ origin: allowedOrigins, credentials: true }));
 app.use(express_1.default.json());
+app.get('/ping', (_, res) => res.json({ ok: true }));
 app.use('/api/auth', auth_1.default);
 app.use('/api/branches', branches_1.default);
 app.use('/api/members', members_1.default);
@@ -33,4 +34,9 @@ app.use('/api/stats', stats_1.default);
 app.use(errorHandler_1.default);
 const PORT = parseInt(process.env.PORT || '5000', 10);
 app.listen(PORT);
+// Keep Render free-tier alive — ping self every 5 minutes
+if (process.env.RENDER_EXTERNAL_URL) {
+    const url = `${process.env.RENDER_EXTERNAL_URL}/ping`;
+    setInterval(() => { fetch(url).catch(() => { }); }, 5 * 60 * 1000);
+}
 //# sourceMappingURL=server.js.map
