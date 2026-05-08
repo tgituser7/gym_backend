@@ -22,6 +22,8 @@ const allowedOrigins = process.env.CLIENT_URL
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
+app.get('/ping', (_, res) => res.json({ ok: true }));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/branches', branchRoutes);
 app.use('/api/members', memberRoutes);
@@ -34,3 +36,9 @@ app.use(errorHandler);
 
 const PORT = parseInt(process.env.PORT || '5000', 10);
 app.listen(PORT);
+
+// Keep Render free-tier alive — ping self every 5 minutes
+if (process.env.RENDER_EXTERNAL_URL) {
+  const url = `${process.env.RENDER_EXTERNAL_URL}/ping`;
+  setInterval(() => { fetch(url).catch(() => {}); }, 5 * 60 * 1000);
+}
