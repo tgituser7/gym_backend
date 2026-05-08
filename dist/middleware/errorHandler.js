@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const errorHandler = (err, _req, res, _next) => {
-    console.error(err.stack);
     if (err.name === 'ValidationError' && err.errors) {
         const messages = Object.values(err.errors).map((e) => e.message);
         res.status(400).json({ error: messages.join(', ') });

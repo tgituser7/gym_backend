@@ -37,7 +37,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const memberSchema = new mongoose_1.Schema({
     branch: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Branch', required: true },
     name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, lowercase: true, trim: true },
+    email: { type: String, lowercase: true, trim: true },
     phone: { type: String, trim: true },
     address: { type: String, trim: true },
     dateOfBirth: { type: Date },
@@ -49,7 +49,7 @@ const memberSchema = new mongoose_1.Schema({
     emergencyContact: { type: String, trim: true },
     notes: { type: String, trim: true },
 }, { timestamps: true });
-memberSchema.index({ branch: 1, email: 1 }, { unique: true });
+memberSchema.index({ branch: 1, email: 1 }, { unique: true, sparse: true });
 memberSchema.index({ branch: 1, status: 1 });
 exports.default = mongoose_1.default.model('Member', memberSchema);
 //# sourceMappingURL=Member.js.map

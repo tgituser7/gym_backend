@@ -6,10 +6,9 @@ import Branch from '../models/Branch';
 import protect, { AuthRequest } from '../middleware/auth';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'gym-secret-dev-key';
 
 const signToken = (branchId: unknown): string =>
-  jwt.sign({ id: branchId }, JWT_SECRET, { expiresIn: '30d' });
+  jwt.sign({ id: branchId }, process.env.JWT_SECRET || 'gym-secret-dev-key', { expiresIn: '30d' });
 
 const safeBranch = (b: Record<string, unknown>) => {
   const { password: _, ...rest } = b;

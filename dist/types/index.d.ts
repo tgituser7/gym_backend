@@ -66,7 +66,7 @@ export interface IMember {
     _id: Types.ObjectId;
     branch: Types.ObjectId;
     name: string;
-    email: string;
+    email?: string;
     phone?: string;
     address?: string;
     dateOfBirth?: Date;

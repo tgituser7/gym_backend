@@ -10,8 +10,7 @@ const Gym_1 = __importDefault(require("../models/Gym"));
 const Branch_1 = __importDefault(require("../models/Branch"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const router = (0, express_1.Router)();
-const JWT_SECRET = process.env.JWT_SECRET || 'gym-secret-dev-key';
-const signToken = (branchId) => jsonwebtoken_1.default.sign({ id: branchId }, JWT_SECRET, { expiresIn: '30d' });
+const signToken = (branchId) => jsonwebtoken_1.default.sign({ id: branchId }, process.env.JWT_SECRET || 'gym-secret-dev-key', { expiresIn: '30d' });
 const safeBranch = (b) => {
     const { password: _, ...rest } = b;
     void _;

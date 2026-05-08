@@ -16,7 +16,10 @@ connectDB();
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((o) => o.trim())
+  : true; // allow all origins when CLIENT_URL is not set
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
@@ -30,4 +33,4 @@ app.use('/api/stats', statsRoutes);
 app.use(errorHandler);
 
 const PORT = parseInt(process.env.PORT || '5000', 10);
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT);

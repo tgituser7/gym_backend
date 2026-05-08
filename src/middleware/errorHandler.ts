@@ -7,7 +7,6 @@ interface MongoError extends Error {
 }
 
 const errorHandler = (err: MongoError, _req: Request, res: Response, _next: NextFunction): void => {
-  console.error(err.stack);
 
   if (err.name === 'ValidationError' && err.errors) {
     const messages = Object.values(err.errors).map((e) => e.message);

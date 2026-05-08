@@ -18,7 +18,10 @@ const stats_1 = __importDefault(require("./routes/stats"));
 dotenv_1.default.config();
 (0, db_1.default)();
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+const allowedOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map((o) => o.trim())
+    : true; // allow all origins when CLIENT_URL is not set
+app.use((0, cors_1.default)({ origin: allowedOrigins, credentials: true }));
 app.use(express_1.default.json());
 app.use('/api/auth', auth_1.default);
 app.use('/api/branches', branches_1.default);
@@ -29,5 +32,5 @@ app.use('/api/fees', fees_1.default);
 app.use('/api/stats', stats_1.default);
 app.use(errorHandler_1.default);
 const PORT = parseInt(process.env.PORT || '5000', 10);
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT);
 //# sourceMappingURL=server.js.map
