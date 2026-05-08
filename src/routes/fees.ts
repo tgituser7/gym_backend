@@ -1,4 +1,5 @@
 import { Router, Response, NextFunction } from 'express';
+import { DateTime } from 'luxon';
 import Fee from '../models/Fee';
 import protect, { AuthRequest } from '../middleware/auth';
 import { branchFilter } from '../utils/gymFilter';
@@ -8,7 +9,7 @@ router.use(protect);
 
 function withOverdue(statusQuery?: string) {
   if (!statusQuery || statusQuery === 'overdue') {
-    const now = new Date();
+    const now = DateTime.now().toUTC().toJSDate();
     return statusQuery === 'overdue'
       ? { $or: [{ status: 'overdue' }, { status: 'pending', dueDate: { $lt: now } }] }
       : {};

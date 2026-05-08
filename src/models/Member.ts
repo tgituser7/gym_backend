@@ -22,7 +22,12 @@ const memberSchema = new Schema<MemberDocument>(
   { timestamps: true }
 );
 
-memberSchema.index({ branch: 1, email: 1 }, { unique: true, sparse: true });
+// Partial index: only enforces uniqueness when email is actually a string,
+// allowing unlimited members without an email in the same branch.
+memberSchema.index(
+  { branch: 1, email: 1 },
+  { unique: true, partialFilterExpression: { email: { $type: 'string' } } }
+);
 memberSchema.index({ branch: 1, status: 1 });
 
 export default mongoose.model<MemberDocument>('Member', memberSchema);

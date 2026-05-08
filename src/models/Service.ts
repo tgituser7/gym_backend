@@ -13,7 +13,7 @@ const serviceSchema = new Schema<ServiceDocument>(
     instructor: { type: Schema.Types.ObjectId, ref: 'Staff' },
     category: {
       type: String,
-      enum: ['Yoga', 'Cardio', 'Strength', 'Pilates', 'Swimming', 'CrossFit', 'Martial Arts', 'Dance', 'Nutrition', 'Other'],
+      enum: ['Yoga', 'Cardio', 'Strength', 'Pilates', 'Swimming', 'Martial Arts', 'Dance', 'Nutrition', 'Other'],
       default: 'Other',
     },
     schedule: { type: String, trim: true },

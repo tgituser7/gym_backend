@@ -1,4 +1,5 @@
 import { Router, Response, NextFunction } from 'express';
+import { DateTime } from 'luxon';
 import { Types } from 'mongoose';
 import Member from '../models/Member';
 import Staff from '../models/Staff';
@@ -12,8 +13,7 @@ router.use(protect);
 
 router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthStart = DateTime.now().toUTC().startOf('month').toJSDate();
     const base = branchFilter(req);
     const branchId = req.branch!._id as Types.ObjectId;
 

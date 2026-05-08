@@ -1,5 +1,7 @@
 import { Router, Response, NextFunction } from 'express';
+import { DateTime } from 'luxon';
 import Member from '../models/Member';
+import Fee from '../models/Fee';
 import protect, { AuthRequest } from '../middleware/auth';
 import { branchFilter } from '../utils/gymFilter';
 
@@ -21,6 +23,33 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Pro
       .populate('services', 'name price category')
       .sort({ createdAt: -1 });
     res.json(members);
+  } catch (err) { next(err); }
+});
+
+router.get('/renewals', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const days = Math.min(Math.max(parseInt((req.query.days as string) || '7', 10), 1), 90);
+    const page = Math.max(parseInt((req.query.page as string) || '1', 10), 1);
+    const limit = Math.min(parseInt((req.query.limit as string) || '20', 10), 100);
+    const skip = (page - 1) * limit;
+    const now = DateTime.now().toUTC().toJSDate();
+    const future = DateTime.now().toUTC().plus({ days }).toJSDate();
+    // Exclude members who already have a paid fee in the last 60 days — they've renewed
+    const paidMemberIds = await Fee.distinct('member', {
+      branch: req.branch!._id,
+      status: 'paid',
+      dueDate: { $gte: DateTime.now().toUTC().minus({ days: 60 }).toJSDate() },
+    });
+    const filter = branchFilter(req, {
+      status: 'active',
+      membershipEndDate: { $gte: now, $lte: future },
+      _id: { $nin: paidMemberIds },
+    });
+    const [members, total] = await Promise.all([
+      Member.find(filter).populate('services', 'name price category').sort({ membershipEndDate: 1 }).skip(skip).limit(limit),
+      Member.countDocuments(filter),
+    ]);
+    res.json({ members, total, page, pages: Math.ceil(total / limit) });
   } catch (err) { next(err); }
 });
 
