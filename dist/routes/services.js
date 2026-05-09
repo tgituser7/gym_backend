@@ -12,7 +12,7 @@ const router = (0, express_1.Router)();
 router.use(auth_1.default);
 router.get('/', async (req, res, next) => {
     try {
-        const { search, status, category } = req.query;
+        const { search, status, category, page: pageQ, limit: limitQ } = req.query;
         const extra = {};
         if (status)
             extra.status = status;
@@ -25,10 +25,22 @@ router.get('/', async (req, res, next) => {
                 { description: { $regex: search, $options: 'i' } },
             ];
         }
-        const services = await Service_1.default.find(filter)
-            .populate('instructor', 'name role specialization')
-            .sort({ createdAt: -1 });
-        res.json(services);
+        if (pageQ !== undefined || limitQ !== undefined) {
+            const page = Math.max(parseInt(pageQ || '1', 10), 1);
+            const limit = Math.min(Math.max(parseInt(limitQ || '10', 10), 1), 500);
+            const skip = (page - 1) * limit;
+            const [services, total] = await Promise.all([
+                Service_1.default.find(filter).populate('instructor', 'name role specialization').sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+                Service_1.default.countDocuments(filter),
+            ]);
+            res.json({ services, total, page, pages: Math.ceil(total / limit) });
+        }
+        else {
+            const services = await Service_1.default.find(filter)
+                .populate('instructor', 'name role specialization')
+                .sort({ createdAt: -1 });
+            res.json(services);
+        }
     }
     catch (err) {
         next(err);

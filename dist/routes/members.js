@@ -13,7 +13,7 @@ const router = (0, express_1.Router)();
 router.use(auth_1.default);
 router.get('/', async (req, res, next) => {
     try {
-        const { search, status } = req.query;
+        const { search, status, page: pageQ, limit: limitQ } = req.query;
         const filter = (0, gymFilter_1.branchFilter)(req, status ? { status } : {});
         if (search) {
             filter.$or = [
@@ -22,10 +22,22 @@ router.get('/', async (req, res, next) => {
                 { phone: { $regex: search, $options: 'i' } },
             ];
         }
-        const members = await Member_1.default.find(filter)
-            .populate('services', 'name price category')
-            .sort({ createdAt: -1 });
-        res.json(members);
+        if (pageQ !== undefined || limitQ !== undefined) {
+            const page = Math.max(parseInt(pageQ || '1', 10), 1);
+            const limit = Math.min(Math.max(parseInt(limitQ || '10', 10), 1), 500);
+            const skip = (page - 1) * limit;
+            const [members, total] = await Promise.all([
+                Member_1.default.find(filter).populate('services', 'name price category').sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+                Member_1.default.countDocuments(filter),
+            ]);
+            res.json({ members, total, page, pages: Math.ceil(total / limit) });
+        }
+        else {
+            const members = await Member_1.default.find(filter)
+                .populate('services', 'name price category')
+                .sort({ createdAt: -1 });
+            res.json(members);
+        }
     }
     catch (err) {
         next(err);
@@ -51,7 +63,7 @@ router.get('/renewals', async (req, res, next) => {
             _id: { $nin: paidMemberIds },
         });
         const [members, total] = await Promise.all([
-            Member_1.default.find(filter).populate('services', 'name price category').sort({ membershipEndDate: 1 }).skip(skip).limit(limit),
+            Member_1.default.find(filter).populate('services', 'name price category').sort({ membershipEndDate: 1, _id: 1 }).skip(skip).limit(limit),
             Member_1.default.countDocuments(filter),
         ]);
         res.json({ members, total, page, pages: Math.ceil(total / limit) });

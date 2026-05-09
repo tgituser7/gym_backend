@@ -11,7 +11,7 @@ const router = (0, express_1.Router)();
 router.use(auth_1.default);
 router.get('/', async (req, res, next) => {
     try {
-        const { search, status, role } = req.query;
+        const { search, status, role, page: pageQ, limit: limitQ } = req.query;
         const extra = {};
         if (status)
             extra.status = status;
@@ -25,8 +25,20 @@ router.get('/', async (req, res, next) => {
                 { specialization: { $regex: search, $options: 'i' } },
             ];
         }
-        const staff = await Staff_1.default.find(filter).sort({ createdAt: -1 });
-        res.json(staff);
+        if (pageQ !== undefined || limitQ !== undefined) {
+            const page = Math.max(parseInt(pageQ || '1', 10), 1);
+            const limit = Math.min(Math.max(parseInt(limitQ || '10', 10), 1), 500);
+            const skip = (page - 1) * limit;
+            const [staff, total] = await Promise.all([
+                Staff_1.default.find(filter).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+                Staff_1.default.countDocuments(filter),
+            ]);
+            res.json({ staff, total, page, pages: Math.ceil(total / limit) });
+        }
+        else {
+            const staff = await Staff_1.default.find(filter).sort({ createdAt: -1 });
+            res.json(staff);
+        }
     }
     catch (err) {
         next(err);
