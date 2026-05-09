@@ -10,7 +10,7 @@ router.use(protect);
 
 router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { search, status } = req.query as Record<string, string>;
+    const { search, status, page: pageQ, limit: limitQ } = req.query as Record<string, string>;
     const filter = branchFilter(req, status ? { status } : {});
     if (search) {
       filter.$or = [
@@ -19,10 +19,21 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Pro
         { phone: { $regex: search, $options: 'i' } },
       ] as unknown as typeof filter.$or;
     }
-    const members = await Member.find(filter)
-      .populate('services', 'name price category')
-      .sort({ createdAt: -1 });
-    res.json(members);
+    if (pageQ !== undefined || limitQ !== undefined) {
+      const page = Math.max(parseInt(pageQ || '1', 10), 1);
+      const limit = Math.min(Math.max(parseInt(limitQ || '10', 10), 1), 500);
+      const skip = (page - 1) * limit;
+      const [members, total] = await Promise.all([
+        Member.find(filter).populate('services', 'name price category').sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+        Member.countDocuments(filter),
+      ]);
+      res.json({ members, total, page, pages: Math.ceil(total / limit) });
+    } else {
+      const members = await Member.find(filter)
+        .populate('services', 'name price category')
+        .sort({ createdAt: -1 });
+      res.json(members);
+    }
   } catch (err) { next(err); }
 });
 
@@ -46,7 +57,7 @@ router.get('/renewals', async (req: AuthRequest, res: Response, next: NextFuncti
       _id: { $nin: paidMemberIds },
     });
     const [members, total] = await Promise.all([
-      Member.find(filter).populate('services', 'name price category').sort({ membershipEndDate: 1 }).skip(skip).limit(limit),
+      Member.find(filter).populate('services', 'name price category').sort({ membershipEndDate: 1, _id: 1 }).skip(skip).limit(limit),
       Member.countDocuments(filter),
     ]);
     res.json({ members, total, page, pages: Math.ceil(total / limit) });

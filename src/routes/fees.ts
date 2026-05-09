@@ -19,13 +19,38 @@ function withOverdue(statusQuery?: string) {
 
 router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { status, memberId } = req.query as Record<string, string>;
+    const { status, memberId, page: pageQ, limit: limitQ } = req.query as Record<string, string>;
     const filter = branchFilter(req, { ...withOverdue(status), ...(memberId ? { member: memberId } : {}) });
-    const fees = await Fee.find(filter)
-      .populate('member', 'name email phone')
-      .populate('services', 'name price')
-      .sort({ dueDate: -1 });
-    res.json(fees);
+
+    // If page/limit provided, return paginated response; otherwise return full array (used internally)
+    if (pageQ !== undefined || limitQ !== undefined) {
+      const page = Math.max(parseInt(pageQ || '1', 10), 1);
+      const limit = Math.min(Math.max(parseInt(limitQ || '10', 10), 1), 500);
+      const skip = (page - 1) * limit;
+      const branchOnlyFilter = branchFilter(req);
+      const [fees, total, summaryResult] = await Promise.all([
+        Fee.find(filter).populate('member', 'name email phone').populate('services', 'name price').sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+        Fee.countDocuments(filter),
+        Fee.aggregate([
+          { $match: branchOnlyFilter },
+          { $group: {
+            _id: null,
+            totalPaid: { $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$amount', 0] } },
+            totalOutstanding: { $sum: { $cond: [{ $ne: ['$status', 'paid'] }, '$amount', 0] } },
+            overdueCount: { $sum: { $cond: [{ $eq: ['$status', 'overdue'] }, 1, 0] } },
+          }},
+        ]),
+      ]);
+      const summary = (summaryResult as Array<{ totalPaid: number; totalOutstanding: number; overdueCount: number }>)[0]
+        ?? { totalPaid: 0, totalOutstanding: 0, overdueCount: 0 };
+      res.json({ fees, total, page, pages: Math.ceil(total / limit), summary });
+    } else {
+      const fees = await Fee.find(filter)
+        .populate('member', 'name email phone')
+        .populate('services', 'name price')
+        .sort({ createdAt: -1, _id: -1 });
+      res.json(fees);
+    }
   } catch (err) { next(err); }
 });
 

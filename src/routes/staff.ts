@@ -8,7 +8,7 @@ router.use(protect);
 
 router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { search, status, role } = req.query as Record<string, string>;
+    const { search, status, role, page: pageQ, limit: limitQ } = req.query as Record<string, string>;
     const extra: Record<string, string> = {};
     if (status) extra.status = status;
     if (role) extra.role = role;
@@ -20,8 +20,19 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Pro
         { specialization: { $regex: search, $options: 'i' } },
       ] as unknown as typeof filter.$or;
     }
-    const staff = await Staff.find(filter).sort({ createdAt: -1 });
-    res.json(staff);
+    if (pageQ !== undefined || limitQ !== undefined) {
+      const page = Math.max(parseInt(pageQ || '1', 10), 1);
+      const limit = Math.min(Math.max(parseInt(limitQ || '10', 10), 1), 500);
+      const skip = (page - 1) * limit;
+      const [staff, total] = await Promise.all([
+        Staff.find(filter).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+        Staff.countDocuments(filter),
+      ]);
+      res.json({ staff, total, page, pages: Math.ceil(total / limit) });
+    } else {
+      const staff = await Staff.find(filter).sort({ createdAt: -1 });
+      res.json(staff);
+    }
   } catch (err) { next(err); }
 });
 

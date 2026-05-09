@@ -9,7 +9,7 @@ router.use(protect);
 
 router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { search, status, category } = req.query as Record<string, string>;
+    const { search, status, category, page: pageQ, limit: limitQ } = req.query as Record<string, string>;
     const extra: Record<string, string> = {};
     if (status) extra.status = status;
     if (category) extra.category = category;
@@ -20,10 +20,21 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Pro
         { description: { $regex: search, $options: 'i' } },
       ] as unknown as typeof filter.$or;
     }
-    const services = await Service.find(filter)
-      .populate('instructor', 'name role specialization')
-      .sort({ createdAt: -1 });
-    res.json(services);
+    if (pageQ !== undefined || limitQ !== undefined) {
+      const page = Math.max(parseInt(pageQ || '1', 10), 1);
+      const limit = Math.min(Math.max(parseInt(limitQ || '10', 10), 1), 500);
+      const skip = (page - 1) * limit;
+      const [services, total] = await Promise.all([
+        Service.find(filter).populate('instructor', 'name role specialization').sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+        Service.countDocuments(filter),
+      ]);
+      res.json({ services, total, page, pages: Math.ceil(total / limit) });
+    } else {
+      const services = await Service.find(filter)
+        .populate('instructor', 'name role specialization')
+        .sort({ createdAt: -1 });
+      res.json(services);
+    }
   } catch (err) { next(err); }
 });
 
