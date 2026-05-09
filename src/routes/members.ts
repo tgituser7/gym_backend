@@ -39,28 +39,46 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction): Pro
 
 router.get('/renewals', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const days = Math.min(Math.max(parseInt((req.query.days as string) || '7', 10), 1), 90);
+    const daysRaw = parseInt((req.query.days as string) || '7', 10);
+    // days=0 means "all" (no upper bound)
+    const days = isNaN(daysRaw) ? 7 : Math.min(Math.max(daysRaw, 0), 365);
     const page = Math.max(parseInt((req.query.page as string) || '1', 10), 1);
     const limit = Math.min(parseInt((req.query.limit as string) || '20', 10), 100);
     const skip = (page - 1) * limit;
-    const now = DateTime.now().toUTC().toJSDate();
-    const future = DateTime.now().toUTC().plus({ days }).toJSDate();
-    // Exclude members who already have a paid fee in the last 60 days — they've renewed
+
     const paidMemberIds = await Fee.distinct('member', {
       branch: req.branch!._id,
       status: 'paid',
       dueDate: { $gte: DateTime.now().toUTC().minus({ days: 60 }).toJSDate() },
     });
-    const filter = branchFilter(req, {
+
+    const baseConditions = {
       status: 'active',
-      membershipEndDate: { $gte: now, $lte: future },
+      membershipEndDate: { $exists: true, $ne: null },
+      'services.0': { $exists: true },
       _id: { $nin: paidMemberIds },
+    };
+    const windowFilter = (n: number) => branchFilter(req, {
+      ...baseConditions,
+      membershipEndDate: { $exists: true, $ne: null, $lte: DateTime.now().toUTC().startOf('day').plus({ days: n }).toJSDate() },
     });
-    const [members, total] = await Promise.all([
-      Member.find(filter).populate('services', 'name price category').sort({ membershipEndDate: 1, _id: 1 }).skip(skip).limit(limit),
-      Member.countDocuments(filter),
+    const allFilter = branchFilter(req, baseConditions);
+    const mainFilter = days === 0 ? allFilter : windowFilter(days);
+
+    const [members, total, cnt3, cnt7, cnt14, cnt30, cntAll] = await Promise.all([
+      Member.find(mainFilter).populate('services', 'name price category').sort({ membershipEndDate: 1, _id: 1 }).skip(skip).limit(limit),
+      Member.countDocuments(mainFilter),
+      Member.countDocuments(windowFilter(3)),
+      Member.countDocuments(windowFilter(7)),
+      Member.countDocuments(windowFilter(14)),
+      Member.countDocuments(windowFilter(30)),
+      Member.countDocuments(allFilter),
     ]);
-    res.json({ members, total, page, pages: Math.ceil(total / limit) });
+
+    res.json({
+      members, total, page, pages: Math.ceil(total / limit),
+      summary: { days3: cnt3, days7: cnt7, days14: cnt14, days30: cnt30, total: cntAll },
+    });
   } catch (err) { next(err); }
 });
 
