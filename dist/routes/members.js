@@ -55,7 +55,7 @@ router.get('/renewals', async (req, res, next) => {
         const paidMemberIds = await Fee_1.default.distinct('member', {
             branch: req.branch._id,
             status: 'settled',
-            dueDate: { $gte: luxon_1.DateTime.now().toUTC().minus({ days: 60 }).toJSDate() },
+            dueDate: { $gte: luxon_1.DateTime.now().toUTC().minus({ days: 60 }).toISO() },
         });
         const baseConditions = {
             status: 'active',
@@ -65,7 +65,7 @@ router.get('/renewals', async (req, res, next) => {
         };
         const windowFilter = (n) => (0, gymFilter_1.branchFilter)(req, {
             ...baseConditions,
-            membershipEndDate: { $exists: true, $ne: null, $lte: luxon_1.DateTime.now().toUTC().startOf('day').plus({ days: n }).toJSDate() },
+            membershipEndDate: { $exists: true, $ne: null, $lte: luxon_1.DateTime.now().toUTC().startOf('day').plus({ days: n }).toISO() },
         });
         const allFilter = (0, gymFilter_1.branchFilter)(req, baseConditions);
         const mainFilter = days === 0 ? allFilter : windowFilter(days);

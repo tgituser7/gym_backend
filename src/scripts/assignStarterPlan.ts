@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import mongoose from 'mongoose';
+import { DateTime } from 'luxon';
 import Branch from '../models/Branch';
 import SubscriptionTier from '../models/SubscriptionTier';
 
@@ -43,7 +44,7 @@ async function run() {
             additionalServices: 0,
             additionalAmount: 0,
             status: 'active',
-            startDate: new Date(),
+            startDate: DateTime.now().toUTC().toISO(),
           },
         },
       }

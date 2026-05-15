@@ -33,7 +33,7 @@ async function upsertMember(data) {
     }
     // Use native insert to avoid Mongoose applying the lowercase setter to
     // undefined email, which would store email:null and violate the sparse index.
-    const now = new Date();
+    const now = luxon_1.DateTime.now().toUTC().toISO();
     const doc = {
         branch: data.branch, name: data.name,
         membershipStartDate: data.membershipStartDate,
@@ -119,8 +119,8 @@ async function seed() {
             name: def.name,
             ...(def.email ? { email: def.email } : {}),
             ...(def.phone ? { phone: def.phone } : {}),
-            membershipStartDate: now.minus({ months: 1 }).toJSDate(),
-            membershipEndDate: now.plus({ days: def.endDays }).toJSDate(),
+            membershipStartDate: now.minus({ months: 1 }).toISO(),
+            membershipEndDate: now.plus({ days: def.endDays }).toISO(),
             services: def.svcs,
             status: 'active',
         });
@@ -137,7 +137,7 @@ async function seed() {
         await upsertFee({
             branch: b, member: m.id,
             amount, description: 'Monthly membership renewal',
-            dueDate: now.plus({ days: 3 }).toJSDate(),
+            dueDate: now.plus({ days: 3 }).toISO(),
             status: 'due', services: m.svcs,
         });
     }
@@ -146,8 +146,8 @@ async function seed() {
     await upsertFee({
         branch: b, member: anjali.id,
         amount: 3800, description: 'Monthly membership renewal',
-        dueDate: now.minus({ days: 2 }).toJSDate(),
-        settledOn: now.minus({ days: 2 }).toJSDate(),
+        dueDate: now.minus({ days: 2 }).toISO(),
+        settledOn: now.minus({ days: 2 }).toISO(),
         status: 'settled', feesMethod: 'online', services: anjali.svcs,
     });
     // Overdue fees for a few members
@@ -157,7 +157,7 @@ async function seed() {
             branch: b, member: m.id,
             amount: m.svcs.length * 1500,
             description: 'Overdue membership fee',
-            dueDate: now.minus({ days: 5 }).toJSDate(),
+            dueDate: now.minus({ days: 5 }).toISO(),
             status: 'overdue', services: m.svcs,
         });
     }
@@ -166,8 +166,8 @@ async function seed() {
     await upsertFee({
         branch: b, member: priya.id,
         amount: 2700, description: 'Previous month fee',
-        dueDate: now.minus({ days: 35 }).toJSDate(),
-        settledOn: now.minus({ days: 35 }).toJSDate(),
+        dueDate: now.minus({ days: 35 }).toISO(),
+        settledOn: now.minus({ days: 35 }).toISO(),
         status: 'settled', feesMethod: 'cash', services: priya.svcs,
     });
     console.log('\nDone.\n');

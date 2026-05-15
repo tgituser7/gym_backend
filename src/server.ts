@@ -11,6 +11,7 @@ import serviceRoutes from './routes/services';
 import feeRoutes from './routes/fees';
 import statsRoutes from './routes/stats';
 import subscriptionRoutes from './routes/subscription';
+import chatRoutes from './routes/chat';
 
 dotenv.config();
 connectDB();
@@ -33,6 +34,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/fees', feeRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/subscription', subscriptionRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use(errorHandler);
 

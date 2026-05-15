@@ -1,4 +1,5 @@
 import { Router, Response, NextFunction } from 'express';
+import { DateTime } from 'luxon';
 import SubscriptionTier from '../models/SubscriptionTier';
 import Branch from '../models/Branch';
 import Member from '../models/Member';
@@ -70,7 +71,7 @@ router.get('/', protect, async (req: AuthRequest, res: Response, next: NextFunct
         additionalServices: 0,
         additionalAmount: 0,
         status: 'active',
-        startDate: new Date(),
+        startDate: DateTime.now().toUTC().toISO(),
       };
       await branch.save();
     }

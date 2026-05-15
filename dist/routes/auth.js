@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const luxon_1 = require("luxon");
 const Gym_1 = __importDefault(require("../models/Gym"));
 const Branch_1 = __importDefault(require("../models/Branch"));
 const auth_1 = __importDefault(require("../middleware/auth"));
@@ -66,7 +67,7 @@ router.post('/register', async (req, res, next) => {
                 additionalServices: 0,
                 additionalAmount: 0,
                 status: 'active',
-                startDate: new Date(),
+                startDate: luxon_1.DateTime.now().toUTC().toISO(),
             },
         });
         const branchObj = branch.toObject();

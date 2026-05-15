@@ -90,12 +90,12 @@ async function run() {
         const doc = {
             branch: b,
             name: def.name,
-            membershipStartDate: now.minus({ months: 1 }).toJSDate(),
-            membershipEndDate: now.plus({ days: def.endDays }).toJSDate(),
+            membershipStartDate: now.minus({ months: 1 }).toISO(),
+            membershipEndDate: now.plus({ days: def.endDays }).toISO(),
             services: def.svcs,
             status: 'active',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: luxon_1.DateTime.now().toUTC().toISO(),
+            updatedAt: luxon_1.DateTime.now().toUTC().toISO(),
         };
         if ('email' in def)
             doc.email = def.email.toLowerCase().trim();
@@ -116,7 +116,7 @@ async function run() {
         branch: b, member: m.id,
         amount: m.svcs.length * 1500,
         description: 'Monthly membership renewal',
-        dueDate: now.plus({ days: 3 }).toJSDate(),
+        dueDate: now.plus({ days: 3 }).toISO(),
         status: 'due', services: m.svcs,
     }));
     await Fee_1.default.insertMany(dueFees);
@@ -126,8 +126,8 @@ async function run() {
     await Fee_1.default.create({
         branch: b, member: anjali.id,
         amount: 3800, description: 'Monthly membership renewal',
-        dueDate: now.minus({ days: 2 }).toJSDate(),
-        settledOn: now.minus({ days: 2 }).toJSDate(),
+        dueDate: now.minus({ days: 2 }).toISO(),
+        settledOn: now.minus({ days: 2 }).toISO(),
         status: 'settled', feesMethod: 'online', services: anjali.svcs,
     });
     console.log(`  Created 1 settled fee (Anjali Mehta)`);
@@ -137,7 +137,7 @@ async function run() {
         branch: b, member: m.id,
         amount: m.svcs.length * 1500,
         description: 'Overdue membership fee',
-        dueDate: now.minus({ days: 5 }).toJSDate(),
+        dueDate: now.minus({ days: 5 }).toISO(),
         status: 'overdue', services: m.svcs,
     }));
     await Fee_1.default.insertMany(overdueFees);
@@ -147,8 +147,8 @@ async function run() {
     await Fee_1.default.create({
         branch: b, member: priya.id,
         amount: 2700, description: 'Previous month fee',
-        dueDate: now.minus({ days: 35 }).toJSDate(),
-        settledOn: now.minus({ days: 35 }).toJSDate(),
+        dueDate: now.minus({ days: 35 }).toISO(),
+        settledOn: now.minus({ days: 35 }).toISO(),
         status: 'settled', feesMethod: 'cash', services: priya.svcs,
     });
     console.log(`  Created 1 settled fee (Priya Sharma)`);

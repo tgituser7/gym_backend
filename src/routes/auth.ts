@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { DateTime } from 'luxon';
 import Gym from '../models/Gym';
 import Branch from '../models/Branch';
 import protect, { AuthRequest } from '../middleware/auth';
@@ -75,7 +76,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
         additionalServices: 0,
         additionalAmount: 0,
         status: 'active',
-        startDate: new Date(),
+        startDate: DateTime.now().toUTC().toISO(),
       },
     });
 

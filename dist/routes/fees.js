@@ -12,7 +12,7 @@ const router = (0, express_1.Router)();
 router.use(auth_1.default);
 function withOverdue(statusQuery) {
     if (!statusQuery || statusQuery === 'overdue') {
-        const now = luxon_1.DateTime.now().toUTC().toJSDate();
+        const now = luxon_1.DateTime.now().toUTC().toISO();
         return statusQuery === 'overdue'
             ? { $or: [{ status: 'overdue' }, { status: 'due', dueDate: { $lt: now } }] }
             : {};

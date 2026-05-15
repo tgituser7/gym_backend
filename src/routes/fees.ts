@@ -9,7 +9,7 @@ router.use(protect);
 
 function withOverdue(statusQuery?: string) {
   if (!statusQuery || statusQuery === 'overdue') {
-    const now = DateTime.now().toUTC().toJSDate();
+    const now = DateTime.now().toUTC().toISO();
     return statusQuery === 'overdue'
       ? { $or: [{ status: 'overdue' }, { status: 'due', dueDate: { $lt: now } }] }
       : {};

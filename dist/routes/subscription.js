@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const luxon_1 = require("luxon");
 const SubscriptionTier_1 = __importDefault(require("../models/SubscriptionTier"));
 const Branch_1 = __importDefault(require("../models/Branch"));
 const Member_1 = __importDefault(require("../models/Member"));
@@ -81,7 +82,7 @@ router.get('/', auth_1.default, async (req, res, next) => {
                 additionalServices: 0,
                 additionalAmount: 0,
                 status: 'active',
-                startDate: new Date(),
+                startDate: luxon_1.DateTime.now().toUTC().toISO(),
             };
             await branch.save();
         }

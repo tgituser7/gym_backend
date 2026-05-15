@@ -10,6 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const mongoose_1 = __importDefault(require("mongoose"));
+const luxon_1 = require("luxon");
 const Branch_1 = __importDefault(require("../models/Branch"));
 const SubscriptionTier_1 = __importDefault(require("../models/SubscriptionTier"));
 async function run() {
@@ -41,7 +42,7 @@ async function run() {
                     additionalServices: 0,
                     additionalAmount: 0,
                     status: 'active',
-                    startDate: new Date(),
+                    startDate: luxon_1.DateTime.now().toUTC().toISO(),
                 },
             },
         });

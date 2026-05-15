@@ -50,7 +50,7 @@ router.get('/renewals', async (req: AuthRequest, res: Response, next: NextFuncti
     const paidMemberIds = await Fee.distinct('member', {
       branch: req.branch!._id,
       status: 'settled',
-      dueDate: { $gte: DateTime.now().toUTC().minus({ days: 60 }).toJSDate() },
+      dueDate: { $gte: DateTime.now().toUTC().minus({ days: 60 }).toISO() },
     });
 
     const baseConditions = {
@@ -61,7 +61,7 @@ router.get('/renewals', async (req: AuthRequest, res: Response, next: NextFuncti
     };
     const windowFilter = (n: number) => branchFilter(req, {
       ...baseConditions,
-      membershipEndDate: { $exists: true, $ne: null, $lte: DateTime.now().toUTC().startOf('day').plus({ days: n }).toJSDate() },
+      membershipEndDate: { $exists: true, $ne: null, $lte: DateTime.now().toUTC().startOf('day').plus({ days: n }).toISO() },
     });
     const allFilter = branchFilter(req, baseConditions);
     const mainFilter = days === 0 ? allFilter : windowFilter(days);
