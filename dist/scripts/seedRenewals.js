@@ -138,7 +138,7 @@ async function seed() {
             branch: b, member: m.id,
             amount, description: 'Monthly membership renewal',
             dueDate: now.plus({ days: 3 }).toJSDate(),
-            status: 'pending', services: m.svcs,
+            status: 'due', services: m.svcs,
         });
     }
     // Paid fees for Anjali (already paid — should NOT appear in renewals)
@@ -147,8 +147,8 @@ async function seed() {
         branch: b, member: anjali.id,
         amount: 3800, description: 'Monthly membership renewal',
         dueDate: now.minus({ days: 2 }).toJSDate(),
-        paymentDate: now.minus({ days: 2 }).toJSDate(),
-        status: 'paid', paymentMethod: 'online', services: anjali.svcs,
+        settledOn: now.minus({ days: 2 }).toJSDate(),
+        status: 'settled', feesMethod: 'online', services: anjali.svcs,
     });
     // Overdue fees for a few members
     const overdueTargets = createdMembers.filter((m) => ['Rahul Verma', 'Fatima Khan', 'Divya Nair'].includes(m.name));
@@ -167,8 +167,8 @@ async function seed() {
         branch: b, member: priya.id,
         amount: 2700, description: 'Previous month fee',
         dueDate: now.minus({ days: 35 }).toJSDate(),
-        paymentDate: now.minus({ days: 35 }).toJSDate(),
-        status: 'paid', paymentMethod: 'cash', services: priya.svcs,
+        settledOn: now.minus({ days: 35 }).toJSDate(),
+        status: 'settled', feesMethod: 'cash', services: priya.svcs,
     });
     console.log('\nDone.\n');
     await mongoose_1.default.disconnect();

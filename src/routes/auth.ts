@@ -54,7 +54,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       status: 'active',
     });
 
-    const branchObj = branch.toObject() as Record<string, unknown>;
+    const branchObj = branch.toObject() as unknown as Record<string, unknown>;
     res.status(201).json({
       token: signToken(branch._id),
       branch: { ...safeBranch(branchObj), gym: gym.toObject() },
@@ -88,7 +88,7 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction): P
       return;
     }
 
-    const branchObj = branch.toObject() as Record<string, unknown>;
+    const branchObj = branch.toObject() as unknown as Record<string, unknown>;
     res.json({ token: signToken(branch._id), branch: safeBranch(branchObj) });
   } catch (err) {
     next(err);

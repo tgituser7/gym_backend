@@ -28,7 +28,7 @@ const protect = async (req: AuthRequest, res: Response, next: NextFunction): Pro
       res.status(403).json({ error: 'This branch is inactive' });
       return;
     }
-    req.branch = branch as AuthRequest['branch'];
+    req.branch = branch as unknown as AuthRequest['branch'];
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });

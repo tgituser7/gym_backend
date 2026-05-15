@@ -93,9 +93,9 @@ export interface IFee {
   amount: number;
   description?: string;
   dueDate: Date;
-  paymentDate?: Date;
-  status: 'paid' | 'pending' | 'overdue';
-  paymentMethod?: 'cash' | 'card' | 'online' | 'other';
+  settledOn?: Date;
+  status: 'settled' | 'due' | 'overdue';
+  feesMethod?: 'cash' | 'card' | 'online' | 'other';
   services: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;

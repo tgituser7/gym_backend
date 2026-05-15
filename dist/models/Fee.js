@@ -40,9 +40,9 @@ const feeSchema = new mongoose_1.Schema({
     amount: { type: Number, required: true, min: 0 },
     description: { type: String, trim: true },
     dueDate: { type: Date, required: true },
-    paymentDate: { type: Date },
-    status: { type: String, enum: ['paid', 'pending', 'overdue'], default: 'pending' },
-    paymentMethod: { type: String, enum: ['cash', 'card', 'online', 'other'] },
+    settledOn: { type: Date },
+    status: { type: String, enum: ['settled', 'due', 'overdue'], default: 'due' },
+    feesMethod: { type: String, enum: ['cash', 'card', 'online', 'other'] },
     services: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Service' }],
 }, { timestamps: true });
 feeSchema.index({ branch: 1, status: 1 });

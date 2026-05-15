@@ -25,16 +25,16 @@ router.get('/', async (req, res, next) => {
             Staff_1.default.countDocuments({ ...base, status: 'active' }),
             Service_1.default.countDocuments({ ...base, status: 'active' }),
             Fee_1.default.aggregate([
-                { $match: { branch: branchId, status: 'paid', paymentDate: { $gte: monthStart } } },
+                { $match: { branch: branchId, status: 'settled', settledOn: { $gte: monthStart } } },
                 { $group: { _id: null, total: { $sum: '$amount' } } },
             ]),
             Fee_1.default.aggregate([
-                { $match: { branch: branchId, status: { $in: ['pending', 'overdue'] } } },
+                { $match: { branch: branchId, status: { $in: ['due', 'overdue'] } } },
                 { $group: { _id: null, total: { $sum: '$amount' } } },
             ]),
             Member_1.default.find(base).sort({ createdAt: -1 }).limit(5)
                 .select('name email status membershipEndDate createdAt'),
-            Fee_1.default.find({ ...base, status: { $in: ['pending', 'overdue'] } })
+            Fee_1.default.find({ ...base, status: { $in: ['due', 'overdue'] } })
                 .sort({ dueDate: 1 }).limit(5)
                 .populate('member', 'name email'),
         ]);

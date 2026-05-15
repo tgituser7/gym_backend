@@ -53,7 +53,7 @@ router.get('/renewals', async (req, res, next) => {
         const skip = (page - 1) * limit;
         const paidMemberIds = await Fee_1.default.distinct('member', {
             branch: req.branch._id,
-            status: 'paid',
+            status: 'settled',
             dueDate: { $gte: luxon_1.DateTime.now().toUTC().minus({ days: 60 }).toJSDate() },
         });
         const baseConditions = {

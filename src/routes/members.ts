@@ -48,7 +48,7 @@ router.get('/renewals', async (req: AuthRequest, res: Response, next: NextFuncti
 
     const paidMemberIds = await Fee.distinct('member', {
       branch: req.branch!._id,
-      status: 'paid',
+      status: 'settled',
       dueDate: { $gte: DateTime.now().toUTC().minus({ days: 60 }).toJSDate() },
     });
 

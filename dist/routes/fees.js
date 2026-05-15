@@ -14,7 +14,7 @@ function withOverdue(statusQuery) {
     if (!statusQuery || statusQuery === 'overdue') {
         const now = luxon_1.DateTime.now().toUTC().toJSDate();
         return statusQuery === 'overdue'
-            ? { $or: [{ status: 'overdue' }, { status: 'pending', dueDate: { $lt: now } }] }
+            ? { $or: [{ status: 'overdue' }, { status: 'due', dueDate: { $lt: now } }] }
             : {};
     }
     return { status: statusQuery };
@@ -36,8 +36,8 @@ router.get('/', async (req, res, next) => {
                     { $match: branchOnlyFilter },
                     { $group: {
                             _id: null,
-                            totalPaid: { $sum: { $cond: [{ $eq: ['$status', 'paid'] }, '$amount', 0] } },
-                            totalOutstanding: { $sum: { $cond: [{ $ne: ['$status', 'paid'] }, '$amount', 0] } },
+                            totalPaid: { $sum: { $cond: [{ $eq: ['$status', 'settled'] }, '$amount', 0] } },
+                            totalOutstanding: { $sum: { $cond: [{ $ne: ['$status', 'settled'] }, '$amount', 0] } },
                             overdueCount: { $sum: { $cond: [{ $eq: ['$status', 'overdue'] }, 1, 0] } },
                         } },
                 ]),
