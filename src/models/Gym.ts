@@ -15,7 +15,7 @@ const gymSchema = new Schema<GymDocument>(
     website: { type: String, trim: true },
     description: { type: String, trim: true },
     logo: { type: String },
-    status: { type: String, enum: ['active', 'inactive', 'suspended'], default: 'active' },
+    status: { type: String, enum: ['active', 'inactive', 'blocked', 'suspended'], default: 'active' },
   },
   { timestamps: true }
 );

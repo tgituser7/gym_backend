@@ -103,13 +103,21 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction): P
       res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
-    if (branch.status === 'inactive') {
-      res.status(403).json({ error: 'This branch is currently inactive. Contact your gym administrator.' });
+    if (branch.status !== 'active') {
+      const msg = branch.status === 'blocked'
+        ? 'This branch has been blocked. Contact support at hello.flexms@gmail.com.'
+        : 'This branch is currently inactive. Contact your administrator.';
+      res.status(403).json({ error: msg });
       return;
     }
     const gym = branch.get('gym') as { status?: string } | null;
-    if (gym?.status === 'suspended') {
-      res.status(403).json({ error: 'This gym account has been suspended. Contact support.' });
+    if (gym && gym.status !== 'active') {
+      const msg = gym.status === 'blocked'
+        ? 'This gym account has been blocked. Contact support at hello.flexms@gmail.com.'
+        : gym.status === 'suspended'
+          ? 'This gym account has been suspended. Contact support at hello.flexms@gmail.com.'
+          : 'This gym account is currently inactive. Contact support at hello.flexms@gmail.com.';
+      res.status(403).json({ error: msg });
       return;
     }
 

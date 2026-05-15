@@ -21,8 +21,11 @@ const protect = async (req, res, next) => {
             res.status(401).json({ error: 'Branch not found' });
             return;
         }
-        if (branch.status === 'inactive') {
-            res.status(403).json({ error: 'This branch is inactive' });
+        if (branch.status !== 'active') {
+            const msg = branch.status === 'blocked'
+                ? 'This branch has been blocked. Contact support at hello.flexms@gmail.com.'
+                : 'This branch is currently inactive. Contact your administrator.';
+            res.status(403).json({ error: msg });
             return;
         }
         req.branch = branch;

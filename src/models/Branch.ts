@@ -25,7 +25,7 @@ const branchSchema = new Schema<BranchDocument>(
     phone: { type: String, trim: true },
     openingHours: { type: String, trim: true },
     manager: { type: Schema.Types.ObjectId, ref: 'Staff' },
-    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+    status: { type: String, enum: ['active', 'inactive', 'blocked'], default: 'active' },
     notes: { type: String, trim: true },
     subscription: { type: branchSubscriptionSchema },
   },

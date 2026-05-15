@@ -54,7 +54,7 @@ const branchSchema = new mongoose_1.Schema({
     phone: { type: String, trim: true },
     openingHours: { type: String, trim: true },
     manager: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Staff' },
-    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+    status: { type: String, enum: ['active', 'inactive', 'blocked'], default: 'active' },
     notes: { type: String, trim: true },
     subscription: { type: branchSubscriptionSchema },
 }, { timestamps: true });

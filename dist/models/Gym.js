@@ -45,7 +45,7 @@ const gymSchema = new mongoose_1.Schema({
     website: { type: String, trim: true },
     description: { type: String, trim: true },
     logo: { type: String },
-    status: { type: String, enum: ['active', 'inactive', 'suspended'], default: 'active' },
+    status: { type: String, enum: ['active', 'inactive', 'blocked', 'suspended'], default: 'active' },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model('Gym', gymSchema);
 //# sourceMappingURL=Gym.js.map

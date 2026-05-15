@@ -12,7 +12,7 @@ export interface IGym {
   website?: string;
   description?: string;
   logo?: string;
-  status: 'active' | 'inactive' | 'suspended';
+  status: 'active' | 'inactive' | 'blocked' | 'suspended';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,7 +39,7 @@ export interface IBranch {
   phone?: string;
   openingHours?: string;
   manager?: Types.ObjectId;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'blocked';
   notes?: string;
   subscription?: IBranchSubscription;
   createdAt: Date;
