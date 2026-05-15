@@ -7,6 +7,7 @@ const express_1 = require("express");
 const Staff_1 = __importDefault(require("../models/Staff"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const gymFilter_1 = require("../utils/gymFilter");
+const limitCheck_1 = require("../utils/limitCheck");
 const router = (0, express_1.Router)();
 router.use(auth_1.default);
 router.get('/', async (req, res, next) => {
@@ -59,6 +60,9 @@ router.get('/:id', async (req, res, next) => {
 });
 router.post('/', async (req, res, next) => {
     try {
+        const allowed = await (0, limitCheck_1.enforceLimit)(req.branch._id, 'staff', res);
+        if (!allowed)
+            return;
         const staff = await Staff_1.default.create({ ...req.body, branch: req.branch._id });
         res.status(201).json(staff);
     }

@@ -3,6 +3,7 @@ import Service from '../models/Service';
 import Member from '../models/Member';
 import protect, { AuthRequest } from '../middleware/auth';
 import { branchFilter } from '../utils/gymFilter';
+import { enforceLimit } from '../utils/limitCheck';
 
 const router = Router();
 router.use(protect);
@@ -49,6 +50,8 @@ router.get('/:id', async (req: AuthRequest, res: Response, next: NextFunction): 
 
 router.post('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const allowed = await enforceLimit(req.branch!._id, 'services', res);
+    if (!allowed) return;
     const service = await Service.create({ ...req.body, branch: req.branch!._id });
     await service.populate('instructor', 'name role specialization');
     res.status(201).json(service);

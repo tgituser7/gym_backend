@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import Gym from '../models/Gym';
 import Branch from '../models/Branch';
 import protect, { AuthRequest } from '../middleware/auth';
+import SubscriptionTier from '../models/SubscriptionTier';
 
 const router = Router();
 
@@ -42,6 +43,21 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     const gym = await Gym.create({ name, email, phone, address, city, state, country, website, description });
 
     const hashed = await bcrypt.hash(password, 12);
+
+    let tier = await SubscriptionTier.findOne({ isActive: true });
+    if (!tier) {
+      tier = await SubscriptionTier.create({
+        name: 'Starter',
+        basePrice: 600,
+        memberLimit: 100,
+        serviceLimit: 5,
+        staffLimit: 3,
+        additionalMemberPrice: 10,
+        additionalMemberUnit: 10,
+        isActive: true,
+      });
+    }
+
     const branch = await Branch.create({
       gym: gym._id,
       name: 'Main Branch',
@@ -52,6 +68,15 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       state,
       phone,
       status: 'active',
+      subscription: {
+        tierId: tier._id,
+        additionalMembers: 0,
+        additionalStaff: 0,
+        additionalServices: 0,
+        additionalAmount: 0,
+        status: 'active',
+        startDate: new Date(),
+      },
     });
 
     const branchObj = branch.toObject() as unknown as Record<string, unknown>;

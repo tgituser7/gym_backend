@@ -17,6 +17,16 @@ export interface IGym {
   updatedAt: Date;
 }
 
+export interface IBranchSubscription {
+  tierId: Types.ObjectId;
+  additionalMembers: number;
+  additionalStaff: number;
+  additionalServices: number;
+  additionalAmount: number;
+  status: 'active' | 'inactive';
+  startDate: Date;
+}
+
 export interface IBranch {
   _id: Types.ObjectId;
   gym: Types.ObjectId;
@@ -31,6 +41,7 @@ export interface IBranch {
   manager?: Types.ObjectId;
   status: 'active' | 'inactive';
   notes?: string;
+  subscription?: IBranchSubscription;
   createdAt: Date;
   updatedAt: Date;
 }

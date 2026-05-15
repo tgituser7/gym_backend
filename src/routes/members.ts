@@ -4,6 +4,7 @@ import Member from '../models/Member';
 import Fee from '../models/Fee';
 import protect, { AuthRequest } from '../middleware/auth';
 import { branchFilter } from '../utils/gymFilter';
+import { enforceLimit } from '../utils/limitCheck';
 
 const router = Router();
 router.use(protect);
@@ -93,6 +94,8 @@ router.get('/:id', async (req: AuthRequest, res: Response, next: NextFunction): 
 
 router.post('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const allowed = await enforceLimit(req.branch!._id, 'members', res);
+    if (!allowed) return;
     const member = await Member.create({ ...req.body, branch: req.branch!._id });
     await member.populate('services', 'name price category');
     res.status(201).json(member);

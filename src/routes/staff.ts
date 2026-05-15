@@ -2,6 +2,7 @@ import { Router, Response, NextFunction } from 'express';
 import Staff from '../models/Staff';
 import protect, { AuthRequest } from '../middleware/auth';
 import { branchFilter } from '../utils/gymFilter';
+import { enforceLimit } from '../utils/limitCheck';
 
 const router = Router();
 router.use(protect);
@@ -46,6 +47,8 @@ router.get('/:id', async (req: AuthRequest, res: Response, next: NextFunction): 
 
 router.post('/', async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const allowed = await enforceLimit(req.branch!._id, 'staff', res);
+    if (!allowed) return;
     const staff = await Staff.create({ ...req.body, branch: req.branch!._id });
     res.status(201).json(staff);
   } catch (err) { next(err); }

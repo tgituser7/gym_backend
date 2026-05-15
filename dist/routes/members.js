@@ -9,6 +9,7 @@ const Member_1 = __importDefault(require("../models/Member"));
 const Fee_1 = __importDefault(require("../models/Fee"));
 const auth_1 = __importDefault(require("../middleware/auth"));
 const gymFilter_1 = require("../utils/gymFilter");
+const limitCheck_1 = require("../utils/limitCheck");
 const router = (0, express_1.Router)();
 router.use(auth_1.default);
 router.get('/', async (req, res, next) => {
@@ -102,6 +103,9 @@ router.get('/:id', async (req, res, next) => {
 });
 router.post('/', async (req, res, next) => {
     try {
+        const allowed = await (0, limitCheck_1.enforceLimit)(req.branch._id, 'members', res);
+        if (!allowed)
+            return;
         const member = await Member_1.default.create({ ...req.body, branch: req.branch._id });
         await member.populate('services', 'name price category');
         res.status(201).json(member);

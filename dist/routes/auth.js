@@ -9,6 +9,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Gym_1 = __importDefault(require("../models/Gym"));
 const Branch_1 = __importDefault(require("../models/Branch"));
 const auth_1 = __importDefault(require("../middleware/auth"));
+const SubscriptionTier_1 = __importDefault(require("../models/SubscriptionTier"));
 const router = (0, express_1.Router)();
 const signToken = (branchId) => jsonwebtoken_1.default.sign({ id: branchId }, process.env.JWT_SECRET || 'gym-secret-dev-key', { expiresIn: '30d' });
 const safeBranch = (b) => {
@@ -35,6 +36,19 @@ router.post('/register', async (req, res, next) => {
         }
         const gym = await Gym_1.default.create({ name, email, phone, address, city, state, country, website, description });
         const hashed = await bcryptjs_1.default.hash(password, 12);
+        let tier = await SubscriptionTier_1.default.findOne({ isActive: true });
+        if (!tier) {
+            tier = await SubscriptionTier_1.default.create({
+                name: 'Starter',
+                basePrice: 600,
+                memberLimit: 100,
+                serviceLimit: 5,
+                staffLimit: 3,
+                additionalMemberPrice: 10,
+                additionalMemberUnit: 10,
+                isActive: true,
+            });
+        }
         const branch = await Branch_1.default.create({
             gym: gym._id,
             name: 'Main Branch',
@@ -45,6 +59,15 @@ router.post('/register', async (req, res, next) => {
             state,
             phone,
             status: 'active',
+            subscription: {
+                tierId: tier._id,
+                additionalMembers: 0,
+                additionalStaff: 0,
+                additionalServices: 0,
+                additionalAmount: 0,
+                status: 'active',
+                startDate: new Date(),
+            },
         });
         const branchObj = branch.toObject();
         res.status(201).json({

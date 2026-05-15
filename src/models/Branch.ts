@@ -1,6 +1,16 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IBranch } from '../types';
 
+const branchSubscriptionSchema = new Schema({
+  tierId: { type: Schema.Types.ObjectId, ref: 'SubscriptionTier' },
+  additionalMembers: { type: Number, default: 0, min: 0 },
+  additionalStaff: { type: Number, default: 0, min: 0 },
+  additionalServices: { type: Number, default: 0, min: 0 },
+  additionalAmount: { type: Number, default: 0, min: 0 },
+  status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+  startDate: { type: Date, default: Date.now },
+}, { _id: false });
+
 export type BranchDocument = Document & IBranch;
 
 const branchSchema = new Schema<BranchDocument>(
@@ -17,6 +27,7 @@ const branchSchema = new Schema<BranchDocument>(
     manager: { type: Schema.Types.ObjectId, ref: 'Staff' },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
     notes: { type: String, trim: true },
+    subscription: { type: branchSubscriptionSchema },
   },
   { timestamps: true }
 );
